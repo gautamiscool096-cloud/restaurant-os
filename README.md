@@ -8,9 +8,9 @@ Stack: Next.js + Tailwind (frontend), Supabase (Postgres, RLS, Auth, Realtime), 
 
 | Phase | Scope | State |
 |---|---|---|
-| 1 | Multi-tenant schema, RLS, RBAC, audit trail, seed tenants, leak tests | this PR |
-| 2 | Self-serve onboarding UI (signup, restaurant profile, branding) | next |
-| 3 | Customer QR menu (browse, cart, order, live status) | |
+| 1 | Multi-tenant schema, RLS, RBAC, audit trail, seed tenants, leak tests | done |
+| 2 | Self-serve onboarding UI (signup, restaurant profile, branding) | done |
+| 3 | Customer QR menu (browse, cart, order, live status) | next |
 | 4 | Manager approval flow, floor view | |
 | 5 | Waiter and kitchen views (realtime) | |
 | 6 | Payments (Razorpay Route), receipts | |
@@ -53,10 +53,25 @@ Platform admins can see and suspend all restaurants and call `platform_metrics()
 
 Every insert, update and delete on a tenant table writes to `audit_log`: who did it (user and role), when, and the old and new row. Owners and managers can read their own tenant's log. Nobody can write to or edit the log through the API.
 
+## Running the app
+
+```bash
+cp .env.example .env.local   # fill in your Supabase URL + publishable key
+npm run dev                  # http://localhost:3000
+```
+
+The flow: `/signup` → confirm email → `/onboarding` (name, web address, tables, logo, colours) → `/dashboard`.
+
+- The web app uses only the publishable key, so every request runs as the signed-in user under RLS. There is no service-role key in the frontend.
+- `src/proxy.ts` refreshes the Supabase session and sends signed-out users to `/login`.
+- `public.my_context()` tells the app shell who the user is, which restaurant they belong to, and whether that restaurant may operate. If it may not (unpaid, expired or suspended), the shell shows a "paused" screen.
+- Logos go to the public `restaurant-assets` bucket. Storage RLS only allows writes under the restaurant's own `<restaurant_id>/` folder.
+
 ## Layout
 
 ```
-supabase/migrations/   schema (1), RLS + RBAC + triggers (2), public RPCs (3)
+src/                   Next.js app (App Router, Tailwind v4)
+supabase/migrations/   schema (1), RLS + RBAC + triggers (2), public RPCs (3), onboarding + storage (4)
 supabase/seed.sql      3 demo restaurants (Spice Route, Bombay Bistro, Green Leaf) + platform admin
 tests/rls/             schema lint, cross-tenant leak matrix, customer QR flow, roles and billing
 tests/support/         test harness and a small Supabase shim for plain Postgres
@@ -74,7 +89,7 @@ DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres npm test
 
 The script recreates a `restaurant_os_test` database, applies `tests/support/supabase-shim.sql` (the `anon`/`authenticated` roles and `auth.uid()`, as Supabase provides them), then all migrations and the seed, and runs every test. Each test runs in its own rolled-back transaction and switches identity per query (`anon`, a specific staff user, or the service role).
 
-CI runs the same suite on every pull request (`.github/workflows/tenant-isolation.yml`).
+CI runs the same suite on every pull request, along with lint, typecheck and a production build (`.github/workflows/tenant-isolation.yml`).
 
 **Cross-tenant QA rule:** every new feature that adds a table, RPC or role permission adds cases to `tests/rls/`. The schema lint fails automatically if a new table lacks `restaurant_id` or RLS, if a foreign key between tenant tables isn't composite, or if `anon` gains a function.
 

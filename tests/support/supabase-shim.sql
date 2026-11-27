@@ -41,3 +41,28 @@ grant execute on function auth.uid(), auth.role() to anon, authenticated, servic
 -- Supabase's default privileges (what the migration has to revoke)
 alter default privileges in schema public grant all on tables    to anon, authenticated, service_role;
 alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
+
+-- Minimal Supabase Storage tables, enough to test our storage.objects policies
+create schema if not exists storage;
+grant usage on schema storage to anon, authenticated, service_role;
+create table if not exists storage.buckets (
+  id      text primary key,
+  name    text not null,
+  public  boolean default false
+);
+create table if not exists storage.objects (
+  id         uuid primary key default gen_random_uuid(),
+  bucket_id  text references storage.buckets(id),
+  name       text,
+  owner      uuid,
+  created_at timestamptz default now()
+);
+alter table storage.objects enable row level security;
+grant all on storage.objects, storage.buckets to anon, authenticated, service_role;
+create or replace function storage.foldername(name text) returns text[] language plpgsql as $$
+declare _parts text[];
+begin
+  select string_to_array(name, '/') into _parts;
+  return _parts[1:array_length(_parts, 1) - 1];
+end $$;
+grant execute on function storage.foldername(text) to anon, authenticated, service_role;

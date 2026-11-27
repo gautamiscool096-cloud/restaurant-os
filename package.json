@@ -6,16 +6,38 @@
     "test": "tests"
   },
   "scripts": {
-    "db:reset:local": "./scripts/db-reset-local.sh",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "./scripts/test.sh",
+    "test:unit": "node --test 'tests/unit/*.test.mjs'",
     "test:rls": "node --test --test-concurrency=1 'tests/rls/*.test.mjs'",
-    "test": "./scripts/test.sh"
+    "db:reset:local": "./scripts/db-reset-local.sh"
   },
   "devDependencies": {
-    "pg": "^8.23.1"
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/node": "^26.6.11",
+    "@types/react": "^19.3.3",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.4.6",
+    "pg": "^8.23.1",
+    "tailwindcss": "^4.3.5",
+    "typescript": "^6.0.3"
   },
   "private": true,
   "type": "module",
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.119.2",
+    "next": "^16.4.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "server-only": "^0.0.1"
   }
 }

@@ -1,4 +1,4 @@
-name: Tenant isolation
+name: CI
 
 on:
   pull_request:
@@ -28,3 +28,9 @@ jobs:
       - run: npm ci
       - name: Migrations, seed, schema lint and cross-tenant leak tests
         run: npm test
+      - run: npm run lint
+      - run: npm run typecheck
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
