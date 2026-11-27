@@ -100,7 +100,7 @@ const stage = async (id) => (await db.query(
   ok(true, 'waiter is sent back from the kitchen display');
 
   // ---------------- manager sees the finished timeline ----------------
-  await m.click('role=tab[name=/All open tables/]');
+  await m.click('role=tab[name=/Occupied tables/]');
   const done2 = m.locator('article', { hasText: '#2' });
   await done2.locator('[data-timer="since-approval"] >> text=Done in').waitFor({ timeout: 15000 }); // next refresh
   const frozen1 = await done2.locator('[data-timer="since-approval"]').innerText();
