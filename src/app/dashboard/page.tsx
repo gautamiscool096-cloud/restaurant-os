@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Alert, Card } from '@/components/ui';
 import { getSession } from '@/lib/context';
 import { createClient } from '@/lib/supabase/server';
@@ -26,7 +27,7 @@ export default async function DashboardHome({
   const steps = [
     { done: true, title: 'Create your restaurant', body: `${tables.count ?? 0} tables are ready.` },
     { done: (items.count ?? 0) > 0, title: 'Add your menu', body: 'Dishes, prices, photos, veg/non-veg. Coming in the next update.' },
-    { done: false, title: 'Print table QR codes', body: 'One code per table, ready to print. Coming soon.' },
+    { done: false, title: 'Print table QR codes', body: 'One code per table, ready to print.', href: '/dashboard/tables' },
     { done: false, title: 'Invite your staff', body: 'Logins for managers, waiters and chefs. Coming soon.' },
   ];
 
@@ -53,7 +54,11 @@ export default async function DashboardHome({
               {s.done ? '✓' : i + 1}
             </span>
             <div>
-              <p className="font-medium">{s.title}</p>
+              <p className="font-medium">
+                {'href' in s && s.href && ['owner', 'manager'].includes(context.role)
+                  ? <Link href={s.href} className="hover:underline">{s.title} →</Link>
+                  : s.title}
+              </p>
               <p className="text-sm text-stone-600">{s.body}</p>
             </div>
           </div>
