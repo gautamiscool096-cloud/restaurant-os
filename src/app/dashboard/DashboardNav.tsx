@@ -11,6 +11,7 @@ const LINKS: { href: string; label: string; roles: StaffRole[] }[] = [
   { href: '/dashboard/kitchen', label: 'Kitchen', roles: ['owner', 'manager', 'chef'] },
   { href: '/dashboard/service', label: 'Service', roles: ['owner', 'manager', 'waiter'] },
   { href: '/dashboard/bills', label: 'Bills', roles: ['owner', 'manager', 'waiter', 'cashier'] },
+  { href: '/dashboard/analytics', label: 'Analytics', roles: ['owner', 'manager'] },
   { href: '/dashboard/tables', label: 'QR codes', roles: ['owner', 'manager'] },
 ];
 
