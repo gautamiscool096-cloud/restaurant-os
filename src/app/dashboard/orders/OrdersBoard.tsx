@@ -10,7 +10,7 @@ import { LiveBadge } from '../LiveBadge';
 import { NextStepButton } from '../NextStepButton';
 import { SinceApproval, StageClock, StageTimeline } from '../OrderTimer';
 
-type Tab = 'new' | 'active' | 'all';
+type Tab = 'new' | 'active' | 'all' | 'free';
 type MenuOption = { id: string; name: string; price_minor: number; is_available: boolean; category: string };
 
 const ACTIVE: BoardOrder['status'][] = ['approved', 'preparing', 'ready'];
@@ -25,7 +25,8 @@ export function OrdersBoard({ currency }: { currency: string }) {
     return {
       new: all.filter((o) => o.status === 'pending').length,
       active: all.filter((o) => ACTIVE.includes(o.status)).length,
-      all: (tables ?? []).filter((t) => t.orders.length).length,
+      all: (tables ?? []).filter((t) => t.session).length,
+      free: (tables ?? []).filter((t) => !t.session).length,
     };
   }, [tables]);
 
@@ -39,7 +40,7 @@ export function OrdersBoard({ currency }: { currency: string }) {
     .map((t) => ({
       table: t,
       orders: t.orders.filter((o) =>
-        tab === 'new' ? o.status === 'pending' : tab === 'active' ? ACTIVE.includes(o.status) : true),
+        tab === 'new' ? o.status === 'pending' : tab === 'active' ? ACTIVE.includes(o.status) : tab === 'all'),
     }))
     .filter((g) => g.orders.length > 0)
     // tables with the oldest waiting order first
@@ -53,18 +54,20 @@ export function OrdersBoard({ currency }: { currency: string }) {
       </div>
 
       <div role="tablist" className="flex gap-2 overflow-x-auto">
-        {([['new', 'New', counts.new], ['active', 'In progress', counts.active], ['all', 'All open tables', counts.all]] as const).map(([k, label, n]) => (
+        {([['new', 'New', counts.new], ['active', 'In progress', counts.active], ['all', 'Occupied tables', counts.all], ['free', 'Free tables', counts.free]] as const).map(([k, label, n]) => (
           <button key={k} role="tab" aria-selected={tab === k} type="button" onClick={() => setTab(k)}
                   className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${tab === k ? 'bg-stone-900 text-white' : 'bg-white text-stone-700 ring-1 ring-stone-200'}`}>
             {label}
-            {n ? <span className={`ml-2 rounded-full px-2 py-0.5 text-xs ${tab === k ? 'bg-white/20' : k === 'new' ? 'bg-amber-500 text-white' : 'bg-stone-100'}`}>{n}</span> : null}
+            {n ? <span className={`ml-2 rounded-full px-2 py-0.5 text-xs ${tab === k ? 'bg-white/20' : k === 'new' ? 'bg-amber-500 text-white' : k === 'free' ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100'}`}>{n}</span> : null}
           </button>
         ))}
       </div>
 
       {error ? <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p> : null}
       {tables === null ? <p className="py-10 text-center text-stone-500">Loading orders…</p> : null}
-      {tables && groups.length === 0 ? (
+      {tab === 'free' && tables ? <FreeTables tables={tables.filter((t) => !t.session)} /> : null}
+
+      {tab !== 'free' && tables && groups.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-stone-300 py-16 text-center text-stone-500">
           {tab === 'new' ? 'No new orders right now. New ones appear here automatically.' : 'Nothing here right now.'}
         </div>
@@ -88,6 +91,33 @@ export function OrdersBoard({ currency }: { currency: string }) {
         ))}
       </div>
     </div>
+  );
+}
+
+function FreeTables({ tables }: { tables: BoardTable[] }) {
+  if (tables.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-stone-300 py-16 text-center text-stone-500">
+        Every table has guests right now.
+      </div>
+    );
+  }
+  const seats = tables.reduce((n, t) => n + t.seats, 0);
+  return (
+    <section aria-label="Free tables" className="space-y-3">
+      <p className="text-sm text-stone-600">
+        {tables.length} table{tables.length > 1 ? 's' : ''} free for new guests · {seats} seats in total
+      </p>
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+        {tables.map((t) => (
+          <li key={t.table_id} className="rounded-2xl bg-white p-3 ring-2 ring-emerald-300">
+            <p className="text-lg font-semibold">{tableName(t)}</p>
+            <p className="text-sm font-medium text-emerald-700">Free</p>
+            <p className="mt-2 text-xs text-stone-500">{t.seats} seats</p>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

@@ -82,6 +82,12 @@ const guestOrder = (table, itemId) => fetch(`${API}/rest/v1/rpc/place_order`, {
   await m.waitForSelector('text=#3');
   ok(true, 'approved order shows under In progress');
 
+  await m.click('role=tab[name=/Free tables/]');
+  await m.waitForSelector('section[aria-label="Free tables"]');
+  ok(await m.locator('section[aria-label="Free tables"] li').count() === 6, 'Free tables lists the 6 tables without guests');
+  ok(await m.locator('section[aria-label="Free tables"] >> text=Table 3').count() === 0, 'a table with guests is not listed as free');
+  await m.screenshot({ path: `${OUT}/p5b-free-tables.png`, fullPage: true });
+
   // ---------------- floor ----------------
   await m.click('nav >> text=Floor');
   await m.waitForSelector('text=tables occupied');
