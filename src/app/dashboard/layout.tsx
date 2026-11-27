@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/context';
 import { logOut } from '@/app/(auth)/actions';
 import { BillingBlocked } from './BillingBlocked';
+import { DashboardNav } from './DashboardNav';
 
 export const metadata: Metadata = { title: 'Dashboard' };
 
@@ -31,6 +32,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <button className="rounded-lg px-3 py-2 text-sm font-medium text-stone-600 hover:bg-stone-100">Log out</button>
           </form>
         </div>
+        {context.operational ? <DashboardNav role={context.role} /> : null}
       </header>
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         {context.operational ? children : <BillingBlocked context={context} />}
