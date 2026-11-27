@@ -16,6 +16,7 @@ const LINKS: { href: string; label: string; roles: StaffRole[] }[] = [
   { href: '/dashboard/tables', label: 'Tables & QR', roles: ['owner', 'manager'] },
   { href: '/dashboard/team', label: 'Team', roles: ['owner', 'manager'] },
   { href: '/dashboard/settings', label: 'Settings', roles: ['owner', 'manager'] },
+  { href: '/dashboard/billing', label: 'Plan', roles: ['owner'] },
 ];
 
 export function DashboardNav({ role }: { role: StaffRole }) {

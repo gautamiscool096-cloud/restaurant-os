@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/context';
+import { createClient } from '@/lib/supabase/server';
 import { logOut } from '@/app/(auth)/actions';
 import { BillingBlocked } from './BillingBlocked';
 import { DashboardNav } from './DashboardNav';
@@ -10,7 +11,10 @@ export const metadata: Metadata = { title: 'Dashboard' };
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, context } = await getSession();
   if (!user) redirect('/login');
-  if (!context) redirect('/onboarding');
+  if (!context) {
+    const { data: isAdmin } = await (await createClient()).rpc('am_platform_admin');
+    redirect(isAdmin ? '/admin' : '/onboarding');
+  }
 
   const r = context.restaurant;
   return (

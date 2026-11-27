@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { Logo } from '@/components/ui';
 import { getSession } from '@/lib/context';
+import { createClient } from '@/lib/supabase/server';
 import { OnboardingForm } from './OnboardingForm';
 import { JoinForm } from './JoinForm';
 
@@ -11,6 +12,8 @@ export default async function OnboardingPage() {
   const { user, context } = await getSession();
   if (!user) redirect('/login');
   if (context) redirect('/dashboard');
+  const { data: isAdmin } = await (await createClient()).rpc('am_platform_admin');
+  if (isAdmin) redirect('/admin');
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6">

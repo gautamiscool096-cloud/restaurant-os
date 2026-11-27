@@ -13,6 +13,8 @@ receipts, the webhook signature check and bill isolation;
 `manage-flow.mjs` covers the menu editor, sold out from the kitchen,
 settings, adding tables, staff invite codes and joining with one, role limits
 and isolation;
+`admin-flow.mjs` covers the platform admin console and an owner choosing a
+plan after the trial ends;
 `analytics-flow.mjs` needs `supabase/demo-history.sql` loaded after the seed
 (30 days of past service) and covers the Analytics screen, roles and isolation.
 
@@ -27,6 +29,7 @@ node tests/e2e/staff-flow.mjs      # reset the database before each flow
 node tests/e2e/kitchen-flow.mjs
 node tests/e2e/payments-flow.mjs
 node tests/e2e/manage-flow.mjs
+node tests/e2e/admin-flow.mjs
 psql "$TEST_DATABASE_URL" -f supabase/demo-history.sql && node tests/e2e/analytics-flow.mjs
 ```
 
