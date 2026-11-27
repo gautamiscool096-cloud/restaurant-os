@@ -12,7 +12,10 @@ const LINKS: { href: string; label: string; roles: StaffRole[] }[] = [
   { href: '/dashboard/service', label: 'Service', roles: ['owner', 'manager', 'waiter'] },
   { href: '/dashboard/bills', label: 'Bills', roles: ['owner', 'manager', 'waiter', 'cashier'] },
   { href: '/dashboard/analytics', label: 'Analytics', roles: ['owner', 'manager'] },
-  { href: '/dashboard/tables', label: 'QR codes', roles: ['owner', 'manager'] },
+  { href: '/dashboard/menu', label: 'Menu', roles: ['owner', 'manager', 'chef'] },
+  { href: '/dashboard/tables', label: 'Tables & QR', roles: ['owner', 'manager'] },
+  { href: '/dashboard/team', label: 'Team', roles: ['owner', 'manager'] },
+  { href: '/dashboard/settings', label: 'Settings', roles: ['owner', 'manager'] },
 ];
 
 export function DashboardNav({ role }: { role: StaffRole }) {

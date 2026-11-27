@@ -10,7 +10,7 @@ function daysLeft(iso: string) {
 
 export default async function DashboardHome({
   searchParams,
-}: { searchParams: Promise<{ welcome?: string; logo?: string }> }) {
+}: { searchParams: Promise<{ welcome?: string; logo?: string; joined?: string }> }) {
   const params = await searchParams;
   const { context } = await getSession();
   if (!context) return null;
@@ -18,22 +18,24 @@ export default async function DashboardHome({
 
   // Plain RLS-scoped reads: these can only ever return this restaurant's rows.
   const supabase = await createClient();
-  const [tables, items] = await Promise.all([
+  const [tables, items, staff] = await Promise.all([
     supabase.from('dining_tables').select('id', { count: 'exact', head: true }),
     supabase.from('menu_items').select('id', { count: 'exact', head: true }),
+    supabase.from('staff').select('id', { count: 'exact', head: true }),
   ]);
 
   const menuUrl = `${SITE_URL}/r/${r.slug}/menu`;
   const steps = [
     { done: true, title: 'Create your restaurant', body: `${tables.count ?? 0} tables are ready.` },
-    { done: (items.count ?? 0) > 0, title: 'Add your menu', body: 'Dishes, prices, photos, veg/non-veg. Coming in the next update.' },
+    { done: (items.count ?? 0) > 0, title: 'Add your menu', body: 'Dishes, prices, photos, veg/non-veg.', href: '/dashboard/menu' },
     { done: false, title: 'Print table QR codes', body: 'One code per table, ready to print.', href: '/dashboard/tables' },
-    { done: false, title: 'Invite your staff', body: 'Logins for managers, waiters and chefs. Coming soon.' },
+    { done: (staff.count ?? 0) > 1, title: 'Invite your staff', body: 'Give managers, waiters, chefs and cashiers their own login.', href: '/dashboard/team' },
   ];
 
   return (
     <div className="space-y-6">
       {params.welcome ? <Alert tone="success">Welcome aboard! {r.name} is set up.</Alert> : null}
+      {params.joined ? <Alert tone="success">You joined {r.name} as {context.role}.</Alert> : null}
       {params.logo === 'failed' ? <Alert>Your restaurant was created, but the logo didn&apos;t upload. You can add it later in settings.</Alert> : null}
       {r.subscription_status === 'trialing'
         ? <Alert tone="info">Free trial: {daysLeft(r.trial_ends_at)} days left.</Alert>

@@ -79,3 +79,19 @@ export async function createRestaurant(_: OnboardingState, form: FormData): Prom
 
   redirect('/dashboard?welcome=1');
 }
+
+export type JoinState = { error?: string } | undefined;
+
+export async function joinWithCode(_: JoinState, form: FormData): Promise<JoinState> {
+  const code = String(form.get('code') ?? '').trim().toUpperCase().replace(/\s+/g, '');
+  if (!/^[0-9A-F]{4}-?[0-9A-F]{4}$/.test(code)) return { error: 'Codes look like AB12-CD34. Check the code and try again.' };
+  const normalized = code.includes('-') ? code : `${code.slice(0, 4)}-${code.slice(4)}`;
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('accept_staff_invite', { p_code: normalized });
+  if (error) {
+    if (/already belongs/.test(error.message)) redirect('/dashboard');
+    if (/not valid|expired/.test(error.message)) return { error: 'That code is not valid or has expired. Ask your manager for a new one.' };
+    return { error: 'Something went wrong. Please try again.' };
+  }
+  redirect('/dashboard?joined=1');
+}
