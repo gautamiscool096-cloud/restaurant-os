@@ -25,3 +25,7 @@ To take real payments:
 3. In Razorpay → Webhooks, add `<your site>/api/razorpay/webhook` with the events `payment.captured`, `payment.failed`, `order.paid`, `transfer.processed` and `refund.processed`. Choose a webhook secret.
 4. Sign in as a platform admin, open **Admin → Payments**, paste the webhook secret, and turn test mode off. The secret is stored in the database and is never shown again.
 5. For each restaurant, set its Razorpay linked account id in **Admin → Restaurants**. Its payouts then go straight to that account, minus the platform fee.
+
+## Demo data
+
+`supabase/seed.sql` creates three demo restaurants. `supabase/demo-history.sql` adds 30 days of past service to them so the Analytics screen has something to show. Use both only on a demo database, never in production.

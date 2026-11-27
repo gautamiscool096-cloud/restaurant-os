@@ -9,7 +9,9 @@ menu; `staff-flow.mjs` covers login, manager approval, floor, isolation and
 signup/onboarding; `kitchen-flow.mjs` covers the kitchen display, the waiter
 screen, order timers, the offline banner and kitchen isolation;
 `payments-flow.mjs` covers bills, cash and online (test mode) payments,
-receipts, the webhook signature check and bill isolation.
+receipts, the webhook signature check and bill isolation;
+`analytics-flow.mjs` needs `supabase/demo-history.sql` loaded after the seed
+(30 days of past service) and covers the Analytics screen, roles and isolation.
 
 ```bash
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres TEST_DB=ros_e2e ./scripts/db-reset-local.sh
@@ -21,6 +23,7 @@ node tests/e2e/customer-flow.mjs   # needs Playwright + Chromium installed
 node tests/e2e/staff-flow.mjs      # reset the database before each flow
 node tests/e2e/kitchen-flow.mjs
 node tests/e2e/payments-flow.mjs
+psql "$TEST_DATABASE_URL" -f supabase/demo-history.sql && node tests/e2e/analytics-flow.mjs
 ```
 
 Note: the seed prefixes dish names with the restaurant name; the flow expects
