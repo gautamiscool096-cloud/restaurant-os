@@ -34,12 +34,12 @@ const assert = (c, m) => { if (!c) throw new Error('ASSERT: ' + m); console.log(
   assert(await p.locator('text=Sold out').count() === 1, 'unavailable thali shows sold out');
 
   // add items
-  await p.click('button[aria-label="Add Paneer Tikka"]');
-  await p.click('button[aria-label="Add one Paneer Tikka"]');
-  await p.click('button[aria-label="Add Masala Chaas"]');
+  await p.click('button[aria-label="Add Spice Route Paneer Tikka"]');
+  await p.click('button[aria-label="Add one Spice Route Paneer Tikka"]');
+  await p.click('button[aria-label="Add Spice Route Masala Chaas"]');
   await p.waitForSelector('text=3 items');
   await p.click('text=View cart');
-  await p.fill('input[aria-label="Instructions for Paneer Tikka"]', 'No onion please');
+  await p.fill('input[aria-label="Instructions for Spice Route Paneer Tikka"]', 'No onion please');
   await p.fill('textarea[aria-label="Order note"]', 'Birthday, bring candles');
   const totalText = await p.locator('button:has-text("Place order")').innerText();
   assert(totalText.includes('658.35'), `cart shows server-matching total (${totalText})`);
@@ -67,7 +67,7 @@ const assert = (c, m) => { if (!c) throw new Error('ASSERT: ' + m); console.log(
   // add more items -> same session
   await p.click('text=+ Add more items');
   await p.waitForSelector('text=Dal Makhani');
-  await p.click('button[aria-label="Add Dal Makhani"]');
+  await p.click('button[aria-label="Add Spice Route Dal Makhani"]');
   await p.click('text=View cart');
   await p.click('button:has-text("Place order")');
   await p.waitForSelector('text=Order #5');
@@ -86,7 +86,7 @@ const assert = (c, m) => { if (!c) throw new Error('ASSERT: ' + m); console.log(
   // a second phone at the same table cannot hijack the session
   const p2 = await (await b.newContext({ ...devices['iPhone 13'] })).newPage();
   await p2.goto(`${BASE}/r/spice-route/menu?t=spice-route-table-2-qr`);
-  await p2.click('button[aria-label="Add Paneer Tikka"]');
+  await p2.click('button[aria-label="Add Spice Route Paneer Tikka"]');
   await p2.click('text=View cart');
   await p2.click('button:has-text("Place order")');
   await p2.waitForSelector('text=already has an open order');

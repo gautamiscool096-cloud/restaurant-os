@@ -19,6 +19,8 @@ import crypto from 'node:crypto';
 import pg from 'pg';
 
 const pool = new pg.Pool({ connectionString: process.env.TEST_DATABASE_URL });
+// Idle connections are dropped when the test database is reset; just reconnect.
+pool.on('error', (e) => console.warn('pool:', e.message));
 const PORT = Number(process.env.MOCK_PORT ?? 54321);
 const IDENT = /^[a-z_][a-z0-9_]*$/;
 

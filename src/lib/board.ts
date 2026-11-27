@@ -27,6 +27,9 @@ export type BoardOrder = {
   total_minor: number;
   created_at: string;
   approved_at: string | null;
+  preparing_at: string | null;
+  ready_at: string | null;
+  served_at: string | null;
   by_staff: boolean;
   items: BoardItem[];
 };
@@ -56,6 +59,7 @@ export function useBoard() {
   const [error, setError] = useState<string | null>(null);
   const [live, setLive] = useState<LiveState>('connecting');
   const [now, setNow] = useState(() => Date.now());
+  const [offline, setOffline] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const refresh = useCallback(async () => {
@@ -89,10 +93,19 @@ export function useBoard() {
     const poll = setInterval(() => {
       if (document.visibilityState === 'visible') void refresh();
     }, POLL_MS);
-    const tick = setInterval(() => setNow(Date.now()), 30_000);
+    const tick = setInterval(() => setNow(Date.now()), 1_000);
     const onVisible = () => { if (document.visibilityState === 'visible') void refresh(); };
     document.addEventListener('visibilitychange', onVisible);
+    // Kitchen tablets lose Wi-Fi: keep showing the last known orders, say
+    // so, and catch up the moment the connection is back.
+    const onOnline = () => { setOffline(false); void refresh(); };
+    const onOffline = () => setOffline(true);
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+    if (!navigator.onLine) setOffline(true);
     return () => {
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
       clearInterval(poll);
       clearInterval(tick);
       document.removeEventListener('visibilitychange', onVisible);
@@ -100,7 +113,7 @@ export function useBoard() {
     };
   }, [refresh, scheduleRefresh]);
 
-  return { tables, error, live, now, refresh };
+  return { tables, error, live, now, refresh, offline };
 }
 
 export function minutesSince(iso: string, now: number) {
@@ -130,5 +143,7 @@ export function friendlyError(message: string) {
   if (/at least one item/.test(message)) return 'An order needs at least one item. Reject it instead.';
   if (/waiting for approval/.test(message)) return 'This order is already approved, so it can’t be edited.';
   if (/already free/.test(message)) return 'This table is already free.';
+  if (/already moved on/.test(message)) return 'Someone already moved this order on.';
+  if (/cannot move an order/.test(message)) return 'Your role can’t do this step.';
   return 'Something went wrong. Please try again.';
 }
