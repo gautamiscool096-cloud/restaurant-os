@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getMenu, resolveTable } from '../data';
+import { isRazorpayConfigured } from '@/lib/razorpay';
 import { OrderStatusApp } from './OrderStatusApp';
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ t?: string }> };
@@ -12,5 +13,8 @@ export default async function OrderPage({ params, searchParams }: Props) {
   const menu = await getMenu(slug);
   if (!menu) notFound();
   const table = await resolveTable(slug, t);
-  return <OrderStatusApp restaurant={menu.restaurant} settings={menu.settings} table={table} tableToken={table ? t! : null} />;
+  return (
+    <OrderStatusApp restaurant={menu.restaurant} settings={menu.settings} table={table} tableToken={table ? t! : null}
+                    razorpayReady={isRazorpayConfigured()} />
+  );
 }

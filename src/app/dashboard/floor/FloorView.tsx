@@ -144,6 +144,7 @@ function TablePanel({
         {t.session ? (
           <footer className="space-y-2 border-t border-stone-100 px-5 py-4">
             <div className="flex justify-between font-semibold"><span>Bill</span><span>{money(bill)}</span></div>
+            <Link href={`/dashboard/bills/${t.session.id}`} className="block text-sm font-medium text-stone-700 underline">Open bill and take payment →</Link>
             {err ? <p role="alert" className="text-sm text-red-700">{err}</p> : null}
             {confirming ? (
               <div className="space-y-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">

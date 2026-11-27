@@ -13,3 +13,15 @@ Production runs on **Supabase** (database, auth, storage) and **Vercel** (web ap
 `seed.sql` (the demo restaurants) is **not** applied in production. `supabase db push` only runs migrations.
 
 The service-role key is never needed by the web app. Don't add it to Vercel.
+
+## Online payments (Razorpay)
+
+Until Razorpay is connected, guests pay at the table and staff record it on the **Bills** screen. A platform admin can turn on **test mode**, which lets you demo online payment without real money.
+
+To take real payments:
+
+1. In Razorpay, activate your account and enable **Route** (so each restaurant's money goes to its own linked account).
+2. In Vercel, add the server-only variables `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` (Razorpay → Account & Settings → API keys), then redeploy.
+3. In Razorpay → Webhooks, add `<your site>/api/razorpay/webhook` with the events `payment.captured`, `payment.failed`, `order.paid`, `transfer.processed` and `refund.processed`. Choose a webhook secret.
+4. Sign in as a platform admin, open **Admin → Payments**, paste the webhook secret, and turn test mode off. The secret is stored in the database and is never shown again.
+5. For each restaurant, set its Razorpay linked account id in **Admin → Restaurants**. Its payouts then go straight to that account, minus the platform fee.

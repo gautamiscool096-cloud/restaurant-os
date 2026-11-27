@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { formatMoney } from '@/lib/money';
 import { storageKeys, type OrderStatus, type PublicMenu, type SessionOrder } from '@/lib/menu-types';
 import { BrandHeader } from '../BrandHeader';
+import { GuestBill } from './GuestBill';
 
 const STEPS: { key: OrderStatus; label: string }[] = [
   { key: 'pending', label: 'Sent' },
@@ -28,17 +29,19 @@ const STATUS_TEXT: Record<OrderStatus, string> = {
 const POLL_MS = 5000;
 
 export function OrderStatusApp({
-  restaurant: r, settings, table, tableToken,
+  restaurant: r, table, tableToken, razorpayReady,
 }: {
   restaurant: PublicMenu['restaurant'];
   settings: PublicMenu['settings'];
   table: { table_number: number; label: string | null } | null;
   tableToken: string | null;
+  razorpayReady: boolean;
 }) {
   const keys = storageKeys(r.slug, tableToken ?? 'none');
   const [token, setToken] = useState<string | null | undefined>(undefined);
   const [orders, setOrders] = useState<SessionOrder[] | null>(null);
   const [reviewed, setReviewed] = useState(false);
+  const [polls, setPolls] = useState(0);
   const money = (m: number) => formatMoney(m, r.currency);
 
   useEffect(() => {
@@ -56,6 +59,7 @@ export function OrderStatusApp({
     if (!token) return;
     const { data } = await createClient().rpc('get_session_orders', { p_session_token: token });
     if (Array.isArray(data)) setOrders(data as SessionOrder[]);
+    setPolls((n) => n + 1);
   }, [token]);
 
   // Poll while the page is visible. (Realtime for guests arrives with the
@@ -71,7 +75,6 @@ export function OrderStatusApp({
   const menuHref = `/r/${r.slug}/menu${tableToken ? `?t=${encodeURIComponent(tableToken)}` : ''}`;
   const tableLabel = table ? (table.label ?? `Table ${table.table_number}`) : null;
   const live = (orders ?? []).filter((o) => o.status !== 'rejected' && o.status !== 'cancelled');
-  const sessionTotal = live.reduce((n, o) => n + o.total_minor, 0);
   const anyServed = live.some((o) => o.status === 'served');
 
   return (
@@ -128,13 +131,10 @@ export function OrderStatusApp({
             <Link href={menuHref} className="block rounded-xl border-2 border-[var(--brand)] py-3 text-center font-semibold text-[var(--brand)]">
               + Add more items
             </Link>
-            <section className="rounded-2xl bg-stone-50 p-4">
-              <div className="flex justify-between font-semibold"><span>Bill so far</span><span>{money(sessionTotal)}</span></div>
-              <p className="mt-2 text-sm text-stone-600">
-                {settings.accepts_cash ? 'You can pay by cash or card at your table. Just ask your waiter. ' : ''}
-                {settings.accepts_online ? 'Online payment is coming soon.' : ''}
-              </p>
-            </section>
+            {token ? (
+              <GuestBill token={token} razorpayReady={razorpayReady} refreshKey={polls}
+                         receiptHref={`/r/${r.slug}/receipt${tableToken ? `?t=${encodeURIComponent(tableToken)}` : ''}`} />
+            ) : null}
           </>
         ) : null}
 
