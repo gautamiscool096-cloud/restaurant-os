@@ -1,7 +1,7 @@
 // Minimal stand-in for Supabase's REST RPC endpoint, for local e2e only:
 // POST /rest/v1/rpc/<fn> {named args} -> select public.<fn>(name => value, ...) as anon.
-const http = require('http');
-const pg = require('pg');
+import http from 'node:http';
+import pg from 'pg';
 const pool = new pg.Pool({ connectionString: process.env.TEST_DATABASE_URL });
 const ALLOWED = new Set(['get_public_menu', 'resolve_table', 'place_order', 'get_session_orders', 'submit_review']);
 const cors = {

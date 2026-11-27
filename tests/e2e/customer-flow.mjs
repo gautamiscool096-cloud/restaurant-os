@@ -1,9 +1,12 @@
 // End-to-end customer flow against the local stand-in: scan table 2 at
 // Spice Route -> filter -> add -> notes -> place order -> status -> add more.
-const { chromium, devices } = require('playwright');
-const pg = require('pg');
+import { createRequire } from 'node:module';
+// Playwright is not a project dependency; use the copy installed on the machine.
+const { chromium, devices } = createRequire(import.meta.url)('playwright');
+import os from 'node:os';
+import pg from 'pg';
 const BASE = process.env.APP_URL ?? 'http://localhost:3102';
-const OUT = process.env.SCREENSHOT_DIR ?? require('os').tmpdir();
+const OUT = process.env.SCREENSHOT_DIR ?? os.tmpdir();
 const db = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
 const assert = (c, m) => { if (!c) throw new Error('ASSERT: ' + m); console.log('ok -', m); };
 
