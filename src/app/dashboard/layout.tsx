@@ -14,7 +14,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const r = context.restaurant;
   return (
     <div className="min-h-dvh">
-      <header className="border-b border-stone-200 bg-white">
+      <header className="border-b border-stone-200 bg-white print:hidden">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             {r.logo_url
