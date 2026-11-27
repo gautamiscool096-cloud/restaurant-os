@@ -126,13 +126,14 @@ begin
     values (sess, r_id, app.sha256('demo-session-' || t.slug || '-5'));
 
     insert into public.orders (id, restaurant_id, table_id, session_id, status, subtotal_minor, total_minor,
-                               approved_by, approved_at, customer_note)
+                               approved_by, approved_at, customer_note, created_at)
     values (('0000000' || t.k || '-0000-4000-8006-000000000002')::uuid, r_id,
             ('0000000' || t.k || '-0000-4000-8002-000000000005')::uuid, sess, 'approved', 34000, 34000,
-            ('0000000' || t.k || '-0000-4000-8001-000000000002')::uuid, now(), 'Birthday table'),
+            ('0000000' || t.k || '-0000-4000-8001-000000000002')::uuid, now() - interval '6 minutes', 'Birthday table',
+            now() - interval '8 minutes'),
            (('0000000' || t.k || '-0000-4000-8006-000000000003')::uuid, r_id,
             ('0000000' || t.k || '-0000-4000-8002-000000000005')::uuid, sess, 'pending', 9000, 9000,
-            null, null, null);
+            null, null, null, now());
     insert into public.order_items (id, restaurant_id, order_id, menu_item_id, name_snapshot, unit_price_minor, quantity, special_instructions)
     values (('0000000' || t.k || '-0000-4000-8009-000000000001')::uuid, r_id,
             ('0000000' || t.k || '-0000-4000-8006-000000000002')::uuid,

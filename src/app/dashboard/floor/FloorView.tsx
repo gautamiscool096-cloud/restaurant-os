@@ -7,6 +7,8 @@ import { formatMoney } from '@/lib/money';
 import { STATUS_PILL, agoLabel, friendlyError, minutesSince, useBoard, type BoardTable } from '@/lib/board';
 import type { OrderStatus } from '@/lib/menu-types';
 import { LiveBadge } from '../LiveBadge';
+import { SinceApproval, StageTimeline } from '../OrderTimer';
+import { currentStage, sinceApproval } from '@/lib/timers';
 
 // What a table is "doing", most urgent first.
 const PRIORITY: OrderStatus[] = ['pending', 'ready', 'preparing', 'approved', 'served'];
@@ -54,13 +56,20 @@ export function FloorView({ currency }: { currency: string }) {
           const st = tableState(t);
           const bill = t.orders.filter((o) => o.status !== 'rejected' && o.status !== 'cancelled').reduce((n, o) => n + o.total_minor, 0);
           const oldestPending = t.orders.find((o) => o.status === 'pending');
-          const late = oldestPending && minutesSince(oldestPending.created_at, now) >= 5;
+          // the order that has been running longest since approval
+          const running = t.orders
+            .filter((o) => o.status === 'approved' || o.status === 'preparing' || o.status === 'ready')
+            .sort((a, b) => (a.approved_at ?? '').localeCompare(b.approved_at ?? ''))[0];
+          const stuck = t.orders.some((o) => o.status !== 'served' && currentStage(o, now)?.level === 'late')
+            || (running && sinceApproval(running, now)?.level === 'late');
+          const late = (oldestPending && minutesSince(oldestPending.created_at, now) >= 5) || stuck;
           return (
             <button key={t.table_id} type="button" onClick={() => setOpenId(t.table_id)}
                     aria-label={`${t.label ?? `Table ${t.number}`}: ${st.label}`}
-                    className={`flex min-h-28 flex-col rounded-2xl p-3 text-left ring-2 transition hover:shadow-md ${TILE[st.key]} ${late ? 'animate-pulse' : ''}`}>
+                    className={`flex min-h-28 flex-col rounded-2xl p-3 text-left ring-2 transition hover:shadow-md ${stuck ? 'bg-red-50 ring-red-400' : TILE[st.key]} ${late ? 'animate-pulse' : ''}`}>
               <span className="text-lg font-semibold text-stone-900">{t.label ?? `Table ${t.number}`}</span>
               <span className="text-sm font-medium">{st.label}</span>
+              {running ? <span className="mt-1"><SinceApproval order={running} now={now} /></span> : null}
               {t.session ? (
                 <span className="mt-auto pt-2 text-xs text-stone-600">
                   {money(bill)} · {agoLabel(t.session.last_activity_at, now)}
@@ -117,8 +126,12 @@ function TablePanel({
               <div className="flex items-center gap-2">
                 <span className="font-semibold">#{o.order_number}</span>
                 <span className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ${STATUS_PILL[o.status].className}`}>{STATUS_PILL[o.status].label}</span>
-                <span className="ml-auto text-sm text-stone-500">{money(o.total_minor)}</span>
+                <span className="ml-auto flex items-center gap-2 text-sm text-stone-500">
+                  <SinceApproval order={o} now={now} />
+                  {money(o.total_minor)}
+                </span>
               </div>
+              <div className="mt-1.5"><StageTimeline order={o} /></div>
               <ul className="mt-2 space-y-0.5 text-sm text-stone-700">
                 {o.items.map((i) => <li key={i.id} className={i.status === 'cancelled' ? 'line-through opacity-50' : ''}>{i.quantity} × {i.name}</li>)}
               </ul>

@@ -7,6 +7,8 @@ import {
   STATUS_PILL, agoLabel, friendlyError, minutesSince, useBoard, type BoardOrder, type BoardTable,
 } from '@/lib/board';
 import { LiveBadge } from '../LiveBadge';
+import { NextStepButton } from '../NextStepButton';
+import { SinceApproval, StageClock, StageTimeline } from '../OrderTimer';
 
 type Tab = 'new' | 'active' | 'all';
 type MenuOption = { id: string; name: string; price_minor: number; is_available: boolean; category: string };
@@ -120,10 +122,18 @@ function OrderCard({
         <span className="font-semibold">#{o.order_number}</span>
         <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ${pill.className}`}>{pill.label}</span>
         {o.is_paid ? <span className="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-medium text-stone-700 ring-1 ring-stone-300">Paid</span> : null}
-        <span className={`ml-auto text-sm ${o.status === 'pending' && waited >= 5 ? 'font-medium text-amber-800' : 'text-stone-500'}`}>
-          {agoLabel(o.created_at, now)}
-        </span>
+        {o.status === 'pending' ? (
+          <span className={`ml-auto text-sm ${waited >= 5 ? 'font-medium text-amber-800' : 'text-stone-500'}`}>
+            {agoLabel(o.created_at, now)}
+          </span>
+        ) : (
+          <span className="ml-auto flex flex-wrap items-center justify-end gap-1.5">
+            <StageClock order={o} now={now} />
+            <SinceApproval order={o} now={now} />
+          </span>
+        )}
       </div>
+      <StageTimeline order={o} />
 
       {mode === 'edit' ? (
         <EditOrder order={o} money={money} busy={busy}
@@ -166,6 +176,8 @@ function OrderCard({
                   className="rounded-lg px-4 py-2.5 font-medium text-red-700 ring-1 ring-red-200 hover:bg-red-50">Reject</button>
         </div>
       ) : null}
+
+      {ACTIVE.includes(o.status) ? <NextStepButton order={o} onDone={onChanged} /> : null}
 
       {mode === 'reject' ? (
         <div className="space-y-2 rounded-lg bg-red-50 p-3">
