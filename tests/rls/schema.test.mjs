@@ -85,5 +85,7 @@ test('anon can execute only the customer-facing functions', () => tx('service', 
      where n.nspname in ('public', 'app') and has_function_privilege('anon', p.oid, 'execute')
      order by 1`);
   assert.deepEqual(rows.map((r) => r.proname),
-    ['get_public_menu', 'get_session_orders', 'place_order', 'resolve_table', 'submit_review']);
+    ['get_public_menu', 'get_session_orders', 'guest_attach_gateway_order', 'guest_bill',
+     'guest_complete_test_payment', 'guest_start_online_payment', 'place_order', 'razorpay_webhook',
+     'resolve_table', 'submit_review']);
 }));

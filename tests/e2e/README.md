@@ -7,7 +7,9 @@ app uses (auth, REST, RPC). Every data request runs as the real `anon` or
 and guard triggers are exercised for real. `customer-flow.mjs` covers the QR
 menu; `staff-flow.mjs` covers login, manager approval, floor, isolation and
 signup/onboarding; `kitchen-flow.mjs` covers the kitchen display, the waiter
-screen, order timers, the offline banner and kitchen isolation.
+screen, order timers, the offline banner and kitchen isolation;
+`payments-flow.mjs` covers bills, cash and online (test mode) payments,
+receipts, the webhook signature check and bill isolation.
 
 ```bash
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres TEST_DB=ros_e2e ./scripts/db-reset-local.sh
@@ -18,6 +20,7 @@ NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321 NEXT_PUBLIC_SUPABASE_PUBLISHABLE
 node tests/e2e/customer-flow.mjs   # needs Playwright + Chromium installed
 node tests/e2e/staff-flow.mjs      # reset the database before each flow
 node tests/e2e/kitchen-flow.mjs
+node tests/e2e/payments-flow.mjs
 ```
 
 Note: the seed prefixes dish names with the restaurant name; the flow expects

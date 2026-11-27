@@ -155,5 +155,8 @@ begin
                from auth.users u where u.id in (''0000000f-0000-4000-8000-000000000001'', ''0000000e-0000-4000-8000-000000000001'')';
   end if;
   insert into public.platform_admins (user_id) values ('0000000f-0000-4000-8000-000000000001');
+
+  -- demo data: online payments run in test mode (no real money)
+  update app.platform_config set payments_test_mode = true;
 end
 $seed$;
