@@ -1,0 +1,21 @@
+{
+  "name": "restaurant-os",
+  "version": "1.0.0",
+  "description": "Multi-tenant restaurant operations platform",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "db:reset:local": "./scripts/db-reset-local.sh",
+    "test:rls": "node --test --test-concurrency=1 'tests/rls/*.test.mjs'",
+    "test": "./scripts/test.sh"
+  },
+  "devDependencies": {
+    "pg": "^8.23.1"
+  },
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  }
+}
