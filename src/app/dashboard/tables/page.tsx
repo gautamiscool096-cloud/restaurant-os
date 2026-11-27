@@ -4,8 +4,9 @@ import { requireRole } from '@/lib/require-role';
 import { createClient } from '@/lib/supabase/server';
 import { SITE_URL } from '@/lib/env';
 import { PrintButton } from './PrintButton';
+import { TablesManager } from './TablesManager';
 
-export const metadata: Metadata = { title: 'Table QR codes' };
+export const metadata: Metadata = { title: 'Tables and QR codes' };
 
 export default async function TablesPage() {
   const context = await requireRole('owner', 'manager');
@@ -37,6 +38,8 @@ export default async function TablesPage() {
         </div>
         <PrintButton />
       </div>
+
+      <TablesManager />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 print:grid-cols-3 print:gap-6">
         {codes.map((c) => (
