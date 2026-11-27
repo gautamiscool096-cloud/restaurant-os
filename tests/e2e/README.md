@@ -8,7 +8,7 @@ Supabase's `/rest/v1/rpc/*` endpoint: it calls the same SQL functions as the
 ```bash
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres TEST_DB=ros_e2e ./scripts/db-reset-local.sh
 export TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/ros_e2e
-node tests/e2e/mock-rest.mjs &
+node tests/e2e/mock-supabase.mjs &
 NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=local \
   npx next dev -p 3102 &
 node tests/e2e/customer-flow.mjs   # needs Playwright + Chromium installed

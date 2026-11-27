@@ -16,6 +16,7 @@ export type AppContext = {
     slug: string;
     name: string;
     logo_url: string | null;
+    currency: string;
     brand_primary_color: string;
     brand_accent_color: string;
     subscription_status: SubscriptionStatus;

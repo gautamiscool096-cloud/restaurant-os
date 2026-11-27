@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import QRCode from 'qrcode';
-import { redirect } from 'next/navigation';
-import { getSession } from '@/lib/context';
+import { requireRole } from '@/lib/require-role';
 import { createClient } from '@/lib/supabase/server';
 import { SITE_URL } from '@/lib/env';
 import { PrintButton } from './PrintButton';
@@ -9,9 +8,7 @@ import { PrintButton } from './PrintButton';
 export const metadata: Metadata = { title: 'Table QR codes' };
 
 export default async function TablesPage() {
-  const { context } = await getSession();
-  if (!context) redirect('/onboarding');
-  if (!['owner', 'manager'].includes(context.role)) redirect('/dashboard');
+  const context = await requireRole('owner', 'manager');
   const r = context.restaurant;
 
   // RLS returns only this restaurant's tables.
